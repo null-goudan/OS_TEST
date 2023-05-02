@@ -31,7 +31,26 @@ struct JobControlBlock
     int             priority;                   // 作业优先级
 };
 
-class Job
+typedef vector<JobControlBlock> JobQueue;
 
+static bool FCFSCompare(JobControlBlock& a, JobControlBlock& b);
+static bool SJFCompare(JobControlBlock& a, JobControlBlock& b);
 
+class JobScheduling{
+    public:
+        JobScheduling():job_queue(new vector<JobControlBlock>()),method(0){};
+        JobScheduling(vector<JobControlBlock>& jobs, int method = FCFS_METHOD):job_queue(new vector<JobControlBlock>(jobs)),method(method){};
+        void scheduling();
+        void outputRes();
+        void ChangeSelfMethod(bool (*method)(JobControlBlock&, JobControlBlock&));
+    private:
+        void FCFS();
+        void SJF();
+        void SLEF_METHOD();
 
+        JobQueue*       job_queue;
+        int             method = 0;
+        double          average_time = 0.0;
+        double          average_time_with_priority = 0.0;
+        bool (*self_schdule_CMP_Method)(JobControlBlock&, JobControlBlock&);
+};
