@@ -12,6 +12,7 @@ enum JobStatus{
     Ready = 0,          // 就绪态
     Run = 1,            // 工作态
     Complete = 2,       // 完成
+    // 这里可能还有其它状态，比如阻塞，但是本次实验不要求做，就懒省事不做啦
 };
 
 struct JobControlBlock
@@ -42,15 +43,17 @@ class JobScheduling{
         JobScheduling(vector<JobControlBlock>& jobs, int method = FCFS_METHOD):job_queue(new vector<JobControlBlock>(jobs)),method(method){};
         void scheduling();
         void outputRes();
+        void JoinNewJob(JobControlBlock& newJob);
         void ChangeSelfMethod(bool (*method)(JobControlBlock&, JobControlBlock&));
+        void ShowNowJobs();
     private:
-        void FCFS();
-        void SJF();
-        void SLEF_METHOD();
+        
 
         JobQueue*       job_queue;
+        JobQueue        wait_queue;
+        JobQueue        complete_queue;
         int             method = 0;
         double          average_time = 0.0;
         double          average_time_with_priority = 0.0;
-        bool (*self_schdule_CMP_Method)(JobControlBlock&, JobControlBlock&);
+        bool (*cmpMethod)(JobControlBlock&, JobControlBlock&);
 };

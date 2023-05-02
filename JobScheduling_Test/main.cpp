@@ -1,4 +1,5 @@
 #include "JobScheduling.h"
+#include <thread>
 
 using namespace std;
 
@@ -21,7 +22,8 @@ int main() {
     JobScheduling* SJFscheduling = new JobScheduling(jobs, SJF_METHOD);
     JobScheduling* SELFscheduling = new JobScheduling(jobs, SELF_METHOD);
 
-    
+    // 初始化好后，可以跑多线程模拟瞬时加入新作业的情况(给自己种个坑吧,有空再实现吧)
+    // 如： thread1.join(scheduling) thread2.join(JoinNewJob) 
     FCFSscheduling->scheduling(); FCFSscheduling->outputRes();
     SJFscheduling->scheduling(); SJFscheduling->outputRes();
     SELFscheduling->ChangeSelfMethod(SELFCompare);
