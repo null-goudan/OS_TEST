@@ -15,8 +15,8 @@ enum ProcessStatus {
 struct ProcessControlBlock
 {
     ProcessControlBlock() = default;
-    ProcessControlBlock(int pid, ProcessStatus status, int arrival_time, int burst_time, int waiting_time = 0,
-        int completion_time = -1, int priority = 0)
+    ProcessControlBlock(int pid, ProcessStatus status, int arrival_time, int burst_time, int priority, int waiting_time = 0,
+        int completion_time = -1)
         :pid(pid), status(status), arrival_time(arrival_time), burst_time(burst_time), waiting_time(waiting_time)
         , completion_time(completion_time), priority(priority), next_task(nullptr), prev_task(nullptr) {}
 
@@ -29,7 +29,7 @@ struct ProcessControlBlock
     int             running_time = 0;           // 运行时间
     int             completion_time;            // 完成时间
     int             priority;                   // 进程优先级
-    double          turnaround_time;            // 周转时间
+    double          turnaround_time = 0.0;      // 周转时间
     bool            flag_isInqueue = false;     // 是否已经加入就绪队列标志位
     // 进程正文、数据及栈在内存区域的指针
     void*           content;
@@ -65,6 +65,5 @@ private:
 
     double                average_time = 0.0;         // 平均周转时间
 };
-
 
 static bool compareFunc(ProcessControlBlock* a, ProcessControlBlock* b);
