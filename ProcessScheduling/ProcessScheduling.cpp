@@ -30,9 +30,9 @@ ProcessScheduling::ProcessScheduling(vector<ProcessControlBlock>& processes) {
 }
 
 void ProcessScheduling::showProcesses() {
-    cout << "-----------------------------------------------------------------------------" <<endl;
+    cout << "-----------------------------------------------------------------------------" << endl;
     cout << "Now Process Status:                                     now processes number:" << this->plist_size << endl;
-    cout << "-----------------------------------------------------------------------------" <<endl;
+    cout << "-----------------------------------------------------------------------------" << endl;
     // cout << "pid\tstatus\t\tarrival_time\t\tburst_time\t\tpriority\t\tcompletion_time" << endl;
     printf("%5s\t%10s\t%9s\t%6s\t%6s  %5s\t%9s\n", "pid", "status", "arrival_time", "burst_time", "priority", "wait_time", "complete_time");
     ProcessControlBlock* pmove = this->processes;
@@ -41,12 +41,12 @@ void ProcessScheduling::showProcesses() {
         // cout << pmove->pid << "\t" << statusName[pmove->status] << "\t\t"
         //     << pmove->arrival_time << "\t\t" << pmove->burst_time << "\t\t"
         //     << pmove->priority << "\t\t" << pmove->completion_time << endl;
-        printf("%5d\t%10s\t%9d\t%6d\t\t%6d\t%6d\t%9d\n", pmove->pid, 
+        printf("%5d\t%10s\t%9d\t%6d\t\t%6d\t%6d\t%9d\n", pmove->pid,
             statusName[pmove->status].c_str(), pmove->arrival_time, pmove->burst_time
-            , pmove->priority, pmove->waiting_time ,pmove->completion_time);
+            , pmove->priority, pmove->waiting_time, pmove->completion_time);
         pmove = pmove->next_task;
     }
-    cout << "-----------------------------------------------------------------------------" <<endl;
+    cout << "-----------------------------------------------------------------------------" << endl;
 }
 
 void ProcessScheduling::startScheduling() {
@@ -78,7 +78,7 @@ void ProcessScheduling::startScheduling() {
         nowRunProcess->status = Run;
         // 进程运行一个单位时间(时间片)
         // 假设一个时间片只运行一行代码(或一行指令)
-        cout << "Time: "<< current_time << " Process [Pid " << nowRunProcess->pid << "] run code line " << nowRunProcess->cur_code_line << endl;
+        cout << "Time: " << current_time << " Process [Pid " << nowRunProcess->pid << "] run code line " << nowRunProcess->cur_code_line << endl;
         /*
             模拟时间片运行的伪代码
             run(nowRunProcess.contont, nowRunProcess.data_area);
@@ -89,11 +89,11 @@ void ProcessScheduling::startScheduling() {
         nowRunProcess->running_time++;
 
         // 调度完成 ，输出当前状态， 调度信息
-        cout << "now time:" <<current_time << endl;
+        cout << "now time:" << current_time << endl;
         cout << "Now Process list:" << endl;
         showProcesses();
-        cout << "Now Wait Process Queue:" <<endl;
-        for(auto i : wait_queue) cout << "pid "<< i->pid << " ";
+        cout << "Now Wait Process Queue:" << endl;
+        for (auto i : wait_queue) cout << "pid " << i->pid << " ";
         cout << endl << endl;
 
         // * 调度完成运行完成的一些计算： 
@@ -118,36 +118,36 @@ void ProcessScheduling::startScheduling() {
     } while (!wait_queue.empty());
 
     // 进程全部完成：
-    cout << "All Process is complete!" <<endl; 
+    cout << "All Process is complete!" << endl;
     cout << "Now Process list:" << endl;
     showProcesses();
 
     // 计算平均周转时间：
     double sum = 0.0;
     ProcessControlBlock* pmove = this->processes;
-    while(nullptr != pmove){
+    while (nullptr != pmove) {
         sum += pmove->turnaround_time;
         pmove = pmove->next_task;
     }
     this->average_time = sum / this->plist_size;
 }
 
-void ProcessScheduling::outputRes(){
-    cout << "-----------------------------------------------------------------------------" <<endl;
-    cout << "Res: " <<endl;
-    cout << "-----------------------------------------------------------------------------" <<endl;
-    printf("%5s\t%10s\t%9s\t%6s\t%6s  %5s\t%9s\n", "pid", "arrival_time", "priority", "wait_time", "complete_time", "turnaround_time");
+void ProcessScheduling::outputRes() {
+    cout << "-----------------------------------------------------------------------------" << endl;
+    cout << "Res: " << endl;
+    cout << "-----------------------------------------------------------------------------" << endl;
+    printf("%5s\t%10s\t%9s\t%6s\t%6s  %5s\n", "pid", "arrival_time", "priority", "wait_time", "complete_time", "turnaround_time");
     ProcessControlBlock* pmove = this->processes;
     if (nullptr == this->processes) return;
     while (nullptr != pmove) {
         // cout << pmove->pid << "\t" << statusName[pmove->status] << "\t\t"
         //     << pmove->arrival_time << "\t\t" << pmove->burst_time << "\t\t"
         //     << pmove->priority << "\t\t" << pmove->completion_time << endl;
-        printf("%5d\t%9d\t%6d\t\t%6d\t%6d\t%9d\n", pmove->pid, 
-            pmove->arrival_time, pmove->priority, pmove->waiting_time ,pmove->completion_time, pmove->turnaround_time);
+        printf("%5d\t%9d\t%6d\t\t%6d\t\t%6d\t\t%6.2f\n", pmove->pid,
+            pmove->arrival_time, pmove->priority, pmove->waiting_time, pmove->completion_time, pmove->turnaround_time);
         pmove = pmove->next_task;
     }
-    cout << "-----------------------------------------------------------------------------" <<endl;
-    cout << "                                              average turnaround time:"<< this->average_time <<endl;
-    cout << "-----------------------------------------------------------------------------" <<endl;
+    cout << "-----------------------------------------------------------------------------" << endl;
+    cout << "                                              average turnaround time:" << this->average_time << endl;
+    cout << "-----------------------------------------------------------------------------" << endl;
 }
