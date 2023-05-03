@@ -103,7 +103,7 @@ void ProcessScheduling::startScheduling() {
             nowRunProcess->completion_time = current_time + 1; // 运行完毕时间
             nowRunProcess->status = Complete;
             // 计算完成时的周转时间
-            nowRunProcess->turnaround_time = nowRunProcess->waiting_time + nowRunProcess->completion_time;
+            nowRunProcess->turnaround_time = nowRunProcess->completion_time - nowRunProcess->arrival_time;
         }
         else {  // 没有运行完毕
             nowRunProcess->priority++; // 加一的话就是进程优先级减一

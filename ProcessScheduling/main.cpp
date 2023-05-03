@@ -12,6 +12,7 @@ int main() {
     };
     ProcessScheduling PD(processes);
     PD.startScheduling();
+    cout << "\n\n" <<endl;
     PD.outputRes();
     return 0;
 }
