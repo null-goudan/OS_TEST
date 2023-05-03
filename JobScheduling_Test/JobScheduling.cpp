@@ -19,6 +19,9 @@ void JobScheduling::JoinNewJob(JobControlBlock& newJob){
 }
 
 void JobScheduling::scheduling(){
+    if(FCFS_METHOD == this->method) cout<<"FCFS scheduling start:"<<endl;
+    if(SJF_METHOD == this->method)  cout<<"SJF scheduling start:"<<endl;
+    if(SELF_METHOD == this->method) cout<<"SELF scheduling start:"<<endl;
     // sort(job_queue->begin(), job_queue->end(), FCFSCompare);
     int current_time = 0;
     do{
@@ -54,8 +57,10 @@ void JobScheduling::scheduling(){
         wait_queue[0].status = Run;
         // 由于实验条件中，该作业被直接完成（没有时间片概念），省略运行过程, 如果不省略的话，那就是时间片轮换运行代码
         // run(wait_queue[0].task)  task 应为真正要执行的任务，为一个指针，指向运行工作的代码空间的某地址，这个地址存放着下一步要执行的指令 占用CPU一段时间后更新该地址
-        // ↓ 计算完成时间(周转时间) 由于直接完成了(如果是时间片的话，那么就得加判断了，判断要执行的代码指针指向的地址是否是尾)，那就直接可以计算完成时间了， 而且给出了执行时间所以直接加就行了 
+        // ↓ 计算完成时间 由于直接完成了(如果是时间片的话，那么就得加判断了，判断要执行的代码指针指向的地址是否是尾)，那就直接可以计算完成时间了， 而且给出了执行时间所以直接加就行了 
         wait_queue[0].completion_time = current_time + wait_queue[0].burst_time;
+        // ↓ 计算周转时间
+        wait_queue[0].turnaround_time = wait_queue[0].completion_time - wait_queue[0].arrival_time;
         // 更新现在时间
         current_time = current_time + wait_queue[0].burst_time;
         // 将该作业变更为完成状态 加入完成队列 并重新装入最开始的队伍管理序列(方便最后输出) [进程调度完成]
@@ -65,20 +70,30 @@ void JobScheduling::scheduling(){
         wait_queue.erase(wait_queue.begin());
 
         // 应实验要求，在这输出当前调度的状态(每次调度完)
+        cout<<"Now time: "<<current_time << endl;
         ShowNowJobs();
 
     }while(!wait_queue.empty());
+    // 所有调度完成，计算平均周转时间
+    double sum = 0.0;
+    for(auto i : complete_queue){
+        sum += i.turnaround_time;
+    }
+    this->average_time = sum / complete_queue.size();
 }
 
 void JobScheduling::outputRes(){
-    if(FCFS_METHOD == this->method) cout<<"FCFS Res:\n----------------------------------------" <<endl;
-    else if(SJF_METHOD == this->method) cout<<"SJF Res:\n----------------------------------------" <<endl;
-    else if(SELF_METHOD == this->method) cout<<"SELF Res:\n--------------------------------------" <<endl;
-    cout << "ID\tWaiting Time\tCompletion Time" << endl;
+    cout<<"-------------------------------------------------"<<endl;
+    if(FCFS_METHOD == this->method) cout<<"FCFS Res:\n---------------------------------------------------" <<endl;
+    else if(SJF_METHOD == this->method) cout<<"SJF Res:\n---------------------------------------------------" <<endl;
+    else if(SELF_METHOD == this->method) cout<<"SELF Res:\n-------------------------------------------------" <<endl;
+    cout << "ID\tWaiting Time\tCompletion Time\tTurnaround Time" << endl;
     for (int i = 0; i < job_queue->size(); i++) {
-        cout << job_queue->at(i).id << "\t" << job_queue->at(i).waiting_time << "\t\t" << job_queue->at(i).completion_time << endl;
+        cout << job_queue->at(i).id << "\t" << job_queue->at(i).waiting_time << "\t\t" << job_queue->at(i).completion_time <<"\t\t"
+            << job_queue->at(i).turnaround_time << endl;
     }
-    cout<<"----------------------------------------"<<endl;
+    cout<<"                     average turnaround time:" <<this->average_time<<endl;
+    cout<<"-------------------------------------------------"<<endl;
 }
 
 void JobScheduling::ChangeSelfMethod(bool (*method)(JobControlBlock&, JobControlBlock&)){
@@ -88,14 +103,16 @@ void JobScheduling::ChangeSelfMethod(bool (*method)(JobControlBlock&, JobControl
 // 输出当前调度状态（所有作业）
 void JobScheduling::ShowNowJobs(){
     // 等待队列
-    cout<<"等待队列:"<<endl;
+    cout<<"Wait queue:"<<endl;
     for(auto i: wait_queue){
-
+        cout << "Job" << i.id << " ";
     }
+    cout<<endl;
     // 完成队列
-    cout<<"完成队列:"<<endl;
+    cout<<"Complete queue:"<<endl;
     for(auto i: complete_queue){
-
+        cout << "Job" << i.id << " ";
     }
+    cout<<"\n"<<endl;
 }
 

@@ -30,6 +30,8 @@ struct JobControlBlock
     int             waiting_time;               // 等待时间
     int             completion_time;            // 完成时间
     int             priority;                   // 作业优先级
+    double          turnaround_time;            // 周转时间
+    void*           task;                       // 代码空间
 };
 
 typedef vector<JobControlBlock> JobQueue;
@@ -47,13 +49,10 @@ class JobScheduling{
         void ChangeSelfMethod(bool (*method)(JobControlBlock&, JobControlBlock&));
         void ShowNowJobs();
     private:
-        
-
         JobQueue*       job_queue;
         JobQueue        wait_queue;
         JobQueue        complete_queue;
         int             method = 0;
         double          average_time = 0.0;
-        double          average_time_with_priority = 0.0;
         bool (*cmpMethod)(JobControlBlock&, JobControlBlock&);
 };
