@@ -5,7 +5,7 @@ string statusName[3] = {
 };
 
 bool compareFunc(ProcessControlBlock* a, ProcessControlBlock* b) {
-    if (a->priority == b->priority) return a->pid < b->pid;
+    if (a->priority == b->priority) return a->waiting_time > b->waiting_time;
     return a->priority < b->priority;         // 优先级小的在前
 }
 
@@ -89,12 +89,12 @@ void ProcessScheduling::startScheduling() {
         nowRunProcess->running_time++;
 
         // 调度完成 ，输出当前状态， 调度信息
-        cout << "now time:" << current_time << endl;
-        cout << "Now Process list:" << endl;
-        showProcesses();
-        cout << "Now Wait Process Queue:" << endl;
-        for (auto i : wait_queue) cout << "pid " << i->pid << " ";
-        cout << endl << endl;
+        // cout << "now time:" << current_time << endl;
+        // cout << "Now Process list:" << endl;
+        // showProcesses();
+        // cout << "Now Wait Process Queue:" << endl;
+        // for (auto i : wait_queue) cout << "pid " << i->pid << " ";
+        // cout << endl << endl;
 
         // * 调度完成运行完成的一些计算： 
         // 时间片运行完的判断，是否进行完毕 ，这个条件可以是需要服务时间和执行时间是否相等，也可以是进程控制块中的指令指向的地址是否是代码底
@@ -106,6 +106,9 @@ void ProcessScheduling::startScheduling() {
             nowRunProcess->turnaround_time = nowRunProcess->completion_time - nowRunProcess->arrival_time;
         }
         else {  // 没有运行完毕
+            /* 
+                这里应该有CPU保存现场的代码
+            */
             nowRunProcess->priority++; // 加一的话就是进程优先级减一
             // 对就绪队列中的所有进程等待时间进行更新
             for (auto i : wait_queue) i->waiting_time++;

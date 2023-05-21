@@ -57,7 +57,7 @@ public:
     void showProcesses();
     void AddProcess(ProcessControlBlock newProcess);
 private:
-    ProcessControlBlock* processes = nullptr;        // 进程表
+    ProcessControlBlock* processes = nullptr;         // 进程表
     int plist_size = 0;                               // 进程表项数
 
     ProcessesQueue        wait_queue;                 // 就绪队列
