@@ -1,41 +1,20 @@
-#include <iostream>
-#include <algorithm>
-#include <fstream>
-#include <vector>
-
-#define FIRST_FIT 1
-#define BEST_FIT  2
-
-using namespace std;
-
-typedef unsigned int address_mem;
-struct memory_item{
-    memory_item()=default;
-    memory_item(int mid, address_mem start, unsigned int size, bool is_alloc = false)
-            :mid(mid),start(start), end(start + size - 1) , size(size), is_alloc(is_alloc), pid(-1){}
-    int mid;
-    bool is_alloc;
-    unsigned int size;
-    // 分配空间的起始位置
-    address_mem start;
-    address_mem end;
-    // 分配空间的作业信息
-    int pid;    // 对应的进程/任务的pid
-};
-
-vector<memory_item*> memory;
-int mid_cnt = 1;
+#include "dynamic_partition.h"
 
 bool cmp_startadd(memory_item* a, memory_item* b){
     return a->start < b->start;
 }
 
-bool cmp_size(memory_item* a, memory_item* b){
+bool cmp_size_min(memory_item* a, memory_item* b){
     if(a->size == b->size) return a->start < b->start;
     return a->size < b->size;                                                     
 }
 
-bool alloc_s(int pid, unsigned int size, int method){
+bool cmp_size_max(memory_item* a, memory_item* b){
+    if(a->size == b->size) return a->start < b->start;
+    return a->size > b->size;                                                     
+}
+
+bool memory_dynamic_patition::alloc(int pid, unsigned int size, int method){
     for(auto i:memory){
         if(i->pid == pid) {
             cout<<"PID already alloced"<<endl;
@@ -62,7 +41,7 @@ bool alloc_s(int pid, unsigned int size, int method){
         break;
     case BEST_FIT:
     // 总是选择最小的空闲空间，所以可以直接从小到大排列
-        sort(memory.begin(), memory.end(), cmp_size);   // 按照空间排序后， 就可以按序查找到最小适合的空间了
+        sort(memory.begin(), memory.end(), cmp_size_min);   // 按照空间排序后， 就可以按序查找到最小适合的空间了
         for(int i = 0;i<memory.size(); ++i){
             memory_item* NowMemoryItem = memory[i];
             if(!NowMemoryItem->is_alloc && NowMemoryItem->size > size){ //遇到第一个有足够空间的内存块
@@ -77,6 +56,29 @@ bool alloc_s(int pid, unsigned int size, int method){
             }
         }
         break;
+    case WORST_FIT: // 最坏适应算法
+    // 选择最长的空闲空间，所以直接按照空间从大到小排列
+        sort(memory.begin(), memory.end(), cmp_size_max);   // 按照空间排序后， 就可以按序查找到最大的空间了
+        // 最坏适应算法找到的第一个就是最大的空间，如果这个空间的大小不足够的话那么就直接返回空间不够
+        for(int i = 0;i<memory.size(); ++i){
+            memory_item* NowMemoryItem = memory[i];
+            if(!NowMemoryItem->is_alloc){ //遇到第一个空闲的内存块
+                if(NowMemoryItem->size >= size){ // 如果第一个空间足够
+                    // 分配空间
+                    memory_item* newMemoryItem = new memory_item(++mid_cnt, NowMemoryItem->start, size, true);
+                    newMemoryItem->pid = pid;
+                    // 更新内存情况
+                    memory_item* lastMemoryItem = new memory_item(NowMemoryItem->mid, newMemoryItem->end + 1, NowMemoryItem->size - size);
+                    memory.erase(memory.begin() + i); delete NowMemoryItem;
+                    memory.push_back(newMemoryItem); memory.push_back(lastMemoryItem);
+                    return true;
+                }else{  // 第一个空间不够直接提示空间不够
+                    cout<<"The space is not enough"<<endl;
+                    return false;
+                }
+            }
+        }
+        break;
     default:
         cout<<"The method name is not define"<<endl;
         return false;
@@ -85,7 +87,7 @@ bool alloc_s(int pid, unsigned int size, int method){
     return false;
 }   
 
-bool free_s(int pid){
+bool memory_dynamic_patition::free(int pid){
     if(memory[0]->pid == pid)        // 第一个分区的情况
     {
         // 如果第二个分区是空余分区， 合并他们(删除第二个分区，将第一个分区大小加上第二个分区的size)
@@ -141,37 +143,18 @@ bool free_s(int pid){
     return false;
 }
 
-void showmemory(){
+void memory_dynamic_patition::showNow(){
     sort(memory.begin(), memory.end(), cmp_startadd); // 方便显示 
     printf("%4s\t%14s\t%14s\t%5s\t%4s\t%5s\n", "mid", "start address", "end address", "size", "pid", "free?");
     for(auto i : memory){
-        printf("%4d\t%14#x\t%14#x\t%5d\t%4d\t%5s\n", 
+        printf("%4d\t%14x\t%14x\t%5d\t%4d\t%5s\n", 
         // printf("%4d\t%14d\t%14d\t%5d\t%4d\t%5s\n", 
                 i->mid, i->start, i->end, i->size, i->pid, (i->is_alloc? "No" : "Yes"));
     }
 }
 
-int main(){
-    // 初始化,给初始分区分配空间
-    unsigned size_init;
-    cout<<"Input size of init partition:"<<endl;
-    cin>>size_init;
-    memory_item* first_item = new memory_item(1, 0, size_init);
+memory_dynamic_patition::memory_dynamic_patition(unsigned int init_size){
+    memory_item* first_item = new memory_item(1, 0, init_size);
     memory.push_back(first_item);
-    showmemory();
-    alloc_s(1, 512, BEST_FIT);
-    showmemory();
-    alloc_s(2, 128, BEST_FIT);
-    showmemory();
-    alloc_s(3, 128, BEST_FIT);
-    showmemory();
-    free_s(2);
-    showmemory();
-    alloc_s(4, 64, BEST_FIT);
-    showmemory();
-    free_s(1);
-    showmemory();
-    alloc_s(1, 64, BEST_FIT);
-    showmemory();
-    return 0;
+    this->mid_cnt = 0;
 }
