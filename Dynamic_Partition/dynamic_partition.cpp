@@ -127,6 +127,7 @@ bool memory_dynamic_patition::free(int pid){
             // 4. 只有匹配上的分区是空闲区
             memory[i]->pid = -1;
             memory[i]->is_alloc = false;
+            return true;
         }
     }
     if(memory[memory.size() - 1]->pid == pid)        //最后一个分区的情况
